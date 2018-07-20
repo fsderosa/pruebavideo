@@ -1,0 +1,67 @@
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- Or if you want a more recent canary version -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@canary"></script> -->
+
+    <script>
+        function cargar() {
+            var video = document.getElementById('video');
+            video.addEventListener("playing", function(){
+                document.getElementById('playing').value="OK";
+            });
+            video.addEventListener("error", function(){
+                document.getElementById('error').value="ERROR";
+            });
+            var urlVideo = document.getElementById('url').value;
+            if (Hls.isSupported()) {
+                var hls = new Hls();
+                hls.loadSource(urlVideo);
+                hls.attachMedia(video);
+                // Object.keys(Hls.Events.E).forEach(function (e) {
+                //     hls.on(Hls.Events[e], console.info.bind(console));
+                // });
+                hls.on(Hls.Events.ERROR, function () {
+                    document.getElementById('error').value="ERROR";
+                    console.log(Hls.Events.ERROR);
+                });
+                hls.on(Hls.Events.BUFFER_APPENDED, function () {
+                    document.getElementById('buffer_appended').value="OK";
+                    console.log(Hls.Events.BUFFER_APPENDED);
+                });
+                
+                hls.on(Hls.Events.STREAM_STATE_TRANSITION, function () {
+                    document.getElementById('transition').value="OK";
+                    console.log(Hls.Events.STREAM_STATE_TRANSITION);
+                });
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    video.play();
+                });
+            }
+            else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = urlVideo;
+                video.addEventListener('loadedmetadata', function () {
+                    video.play();
+                });
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <input type="text" id="url" value="">
+    <input type="button" id="load" onclick="cargar()" value="Cargar">
+    <br>
+    <video id="video" width="200"></video>
+    <br>
+    <input type="text" id="error">
+    <br>
+    <input type="text" id="playing">
+    <br>
+    <input type="text" id="transition">
+    <br>
+    <input type="text" id="buffer_appended">
+</body>
+
+</html>
